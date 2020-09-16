@@ -1,36 +1,31 @@
-import React from "react";
-import NavBar from "./components/NavBar";
-import { Switch, Route } from "react-router-dom";
-
-import HomePage from "./pages/HomePage";
-import ProfilePage from "./pages/ProfilePage";
-import SearchQueryPage from "./pages/SearchQueryPage";
-import VideoDetailPage from "./pages/VideoDetailPage";
-import Form from './components/FormValidation';
-import Playlist from './components/Playlist';
-import {ContextProvider} from './contextExample';
-/**
- * / => trending videos
- * /search/:query => Search results
- * /profile => Profile data
- * /videos/:id => Video Detail page
- */
+import React from 'react';
+import './App.css';
+import { Switch, Route, Redirect} from 'react-router-dom';
+import Navbar from './components/NavBar';
+import LoginPage from './pages/LoginPage';
+import HomePage from './pages/HomePage';
+import VideoDetail from './pages/VideoDetail'
+import SearchResult from './pages/SearchResult'
+import PlaylistPage from './pages/PlaylistPage'
+import TrendingPage from './pages/TrendingPage';
+import withProtected from "./components/withProtected";
 
 function App() {
   return (
-    <ContextProvider>
     <div className="App">
-      <NavBar />
+      <Navbar />
+      <div className='content'>
       <Switch>
-        <Route exact path="/" component={HomePage} />
-        <Route exact path="/search/:query" component={SearchQueryPage} />
-        <Route exact path="/profile" component={ProfilePage} />
-        <Route exact path="/videos/:videoId" component={VideoDetailPage} />
-        <Route exact path="/form" component={Form} />
-        <Route exact path="/playlist" component={Playlist} />
+        <Route  exact path="/" component={HomePage}/>
+        <Route  exact path="/trending" component={TrendingPage}/>
+        <Route  exact path="/login" component={LoginPage}/>
+        <Route  exact path="/videos/:videoId" component={VideoDetail}/>
+        <Route exact path ='/search/:searchQuery' component={SearchResult}/>
+        <Route exact path='/playlist' component={withProtected(PlaylistPage)}/>
+        <Redirect to="/" />
       </Switch>
+      </div>
     </div>
-    </ContextProvider>
   );
 }
 

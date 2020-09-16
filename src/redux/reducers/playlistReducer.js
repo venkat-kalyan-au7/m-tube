@@ -1,23 +1,18 @@
+import { SET_PLAYLIST, TOGGLE_PLAYLIST_FETCHING_STATE } from '../actionTypes'
 const initialState = {
-    playlist:null,
-    pending_playlist:[]
-};
-
-export default (state = initialState, action) => {
-    const {payload, type} = action;
-    
-    switch(type) {
-        case 'FETCH_PLAYLIST':
-            //important
-            return {...state, playlist: payload.items}
-        break;
-
-        case 'FETCH_PLAYLIST_PENDING':
-            return {...state, pending_playlist: state.pending_playlist.concat(payload) }
-        
-        default:
-            break;
-    }
-
-    return state;
+    playlist: null,
+    isPlaylistFetching: false
 }
+
+const playlistReducer = (state = initialState, action) => {
+    const { type, payload } = action
+    switch (type) {
+        case SET_PLAYLIST:
+            return { ...state, playlist: payload }
+        case TOGGLE_PLAYLIST_FETCHING_STATE:
+            return { ...state, isPlaylistFetching: !state.isPlaylistFetching }
+        default:
+            return state
+    }
+}
+export default playlistReducer

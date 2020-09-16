@@ -1,142 +1,107 @@
-import Axios from "axios";
-import config from "../../config";
-
-const { API_KEY, BASE_URL } = config;
-
-export const fetchTrendingVideos = ({ pageToken = "" }) => async dispatch => {
-  dispatch({ type: "CLEAR_VIDEOS" });
-  const { data } = await Axios.get(`${BASE_URL}/videos`, {
-    params: {
-      part: "snippet",
-      maxResults: 30,
-      key: API_KEY,
-      chart: "mostPopular",
-      regionCode: "IN",
-      pageToken
+import { SET_VIDEOS, TOGGLE_VIDEO_FETCHING_STATE } from '../actionTypes'
+import axios from 'axios'
+import config from '../../config'
+export const fetchTrendingVideos = (pageToken = "") => async disptach => {
+    try {
+        disptach({ type: TOGGLE_VIDEO_FETCHING_STATE })
+        disptach({ type: SET_VIDEOS, payload: null })
+        let { data } = await axios(`${config.BASE_URL}/videos?part=snippet&key=${config.API_KEY}&regionCode=In&chart=mostPopular&maxResults=30${
+            pageToken.length !== 0 ? "&pageToken=" + pageToken : ""
+            }`
+        )
+        const chnlId = []
+        data.items.forEach(el => {
+            chnlId.push(el.snippet.channelId)
+        })
+        const { data: pictures } = await axios(`${config.BASE_URL}/channels?part=snippet&id=${[chnlId]},items.id&key=${config.API_KEY}`)
+        let chnlpic = []
+        pictures.items.forEach(el => {
+            chnlpic.push(el)
+        })
+        for (let i = 0; i < chnlpic.length; i++) {
+            for (let j = 0; j < data.items.length; j++) {
+                if (data.items[j].snippet.channelId === chnlpic[i].id) {
+                    data.items[j].snippet.channelId = chnlpic[i].snippet.thumbnails.default.url
+                    break
+                }
+            }
+        }
+        disptach({ type: SET_VIDEOS, payload: data })
     }
-  });
-  dispatch({ type: "SET_VIDEOS", payload: data });
-};
-
-export const fetchComments = (videoId, pageToken = "") => async (
-  dispatch,
-  getState
-) => {
-  const currentComments = getState().videoState.comments;
-  const { data } = await Axios.get(
-    `https://www.googleapis.com/youtube/v3/commentThreads`,
-    {
-      params: {
-        part: "snippet,replies",
-        videoId,
-        key: API_KEY,
-        pageToken
-      }
+    catch (err) {
+        console.log(err)
     }
-  );
-  console.log(data);
-
-  // { obj1: "something", items: [1, 2] } => currentComment => Cycle 1
-  // { obj1: "mango", items: [3, 4] } => data
-  // { obj1: "mango", items: [1, 2, 3, 4] } => newCurrentComments => Cycle 2
-
-  // { obj1: "apples", items: [5, 6]} => data
-  // { obj1: "apples", items: [1, 2, 3, 4, 5, 6] } => newCurrentComments? => Cycle 2
-  dispatch({
-    type: "SET_COMMENTS",
-    payload: !currentComments
-      ? data
-      : { ...data, items: [...currentComments.items, ...data.items] }
-  });
-};
-
-export const clearComments = () => {
-  return { type: "CLEAR_COMMENTS" };
-};
-
-export const setSearchQuery = searchQuery => {
-  return {
-    type: "SET_SEARCH_QUERY",
-    payload: searchQuery
-  };
-};
-
-export const fetchSearchResults = ({
-  pageToken = "",
-  searchQuery
-}) => async dispatch => {
-  console.log(searchQuery);
-  try {
-    const { data } = await Axios.get(`${BASE_URL}/search`, {
-      params: {
-        part: "snippet",
-        maxResults: 30,
-        key: API_KEY,
-        pageToken: pageToken,
-        q: searchQuery
-      }
-    });
-    dispatch({ type: "SET_VIDEOS", payload: data });
-  } catch (err) {
-    console.error(err);
-  }
-};
-
-
-export const clearVideos = () => {
-  return {
-    type: "CLEAR_VIDEOS"
-  };
-};
-
-export const createPlaylist = ({parameters}) => async dispatch => {
-  console.log('parameters:',parameters);
-  let url = "https://www.googleapis.com/youtube/v3/playlists?part=snippet";
-  //Important
-  let token = localStorage.getItem('accessToken');
-
-  let formData = {
-    "snippet": {
-      "title": parameters.title,
-      "description": parameters.description
+    finally {
+        disptach({ type: TOGGLE_VIDEO_FETCHING_STATE })
     }
-  };
-
-  fetch(url, {
-    "method":"POST",
-    "headers":{
-      "Authorization": `Bearer ${token}`,
-      "content-type": "application/json"
-    },
-    "body": JSON.stringify(formData)
-  })
-  .then(function(response){
-    return response.json();
-  })
-  .then(function(data){
-    console.log('Reached here:',data);
-    dispatch({
-      type: "FETCH_PLAYLIST_PENDING",
-      payload:[data]
-    });
-  }) 
-  .catch(function(err){
-    console.log('error occured',err);
-  })
 }
 
-export const fetchPlaylists = ({pageToken=""}) => async dispatch => {
-  const {data} = await Axios.get(`${BASE_URL}/playlists`, {
-    params: {
-      part:"snippet",
-      maxResults: 30,
-      mine: true,
-      key: API_KEY,
-      pageToken,
-      access_token: localStorage.getItem('accessToken')
+export const fetchHomeVideos = (pageToken = "") => async disptach => {
+    try {
+        disptach({ type: TOGGLE_VIDEO_FETCHING_STATE })
+        disptach({ type: SET_VIDEOS, payload: null })
+        let { data } = await axios(`${config.BASE_URL}/videos?part=snippet&key=${config.API_KEY}&chart=mostPopular&maxResults=30${
+            pageToken.length !== 0 ? "&pageToken=" + pageToken : ""
+            }`
+        )
+        const chnlId = []
+        data.items.forEach(el => {
+            chnlId.push(el.snippet.channelId)
+        })
+        const { data: pictures } = await axios(`${config.BASE_URL}/channels?part=snippet&id=${[chnlId]},items.id&key=${config.API_KEY}`)
+        let chnlpic = []
+        pictures.items.forEach(el => {
+            chnlpic.push(el)
+        })
+        for (let i = 0; i < chnlpic.length; i++) {
+            for (let j = 0; j < data.items.length; j++) {
+                if (data.items[j].snippet.channelId === chnlpic[i].id) {
+                    data.items[j].snippet.channelId = chnlpic[i].snippet.thumbnails.default.url
+                    break
+                }
+            }
+        }
+        disptach({ type: SET_VIDEOS, payload: data })
     }
-  });
-  console.log('data playlist:',data);
-  dispatch({type:"FETCH_PLAYLIST", payload: data});
-  dispatch({type:"SET_LOADER", payload: false});
+    catch (err) {
+        console.log(err)
+    }
+    finally {
+        disptach({ type: TOGGLE_VIDEO_FETCHING_STATE })
+    }
+}
+
+export const fetchSearchVideos = (searchQuery, pageToken = "") => async disptach => {
+    try {
+        disptach({ type: TOGGLE_VIDEO_FETCHING_STATE })
+        disptach({ type: SET_VIDEOS, payload: null })
+        let { data } = await axios(`${config.BASE_URL}/search?q=${searchQuery}&type=video&part=snippet&key=${config.API_KEY}&regionCode=In&chart=mostPopular&maxResults=15${
+            pageToken.length !== 0 ? "&pageToken=" + pageToken : ""
+            }`
+        )
+        const chnlId = []
+        data.items.forEach(el => {
+            chnlId.push(el.snippet.channelId)
+        })
+        const { data: pictures } = await axios(`${config.BASE_URL}/channels?part=snippet&id=${[chnlId]},items.id&key=${config.API_KEY}`)
+        let chnlpic = []
+        pictures.items.forEach(el => {
+            chnlpic.push(el)
+        })
+        for (let i = 0; i < chnlpic.length; i++) {
+            for (let j = 0; j < data.items.length; j++) {
+                if (data.items[j].snippet.channelId === chnlpic[i].id) {
+                    data.items[j].snippet.channelId = chnlpic[i].snippet.thumbnails.default.url
+                    break
+                }
+            }
+        }
+        disptach({ type: SET_VIDEOS, payload: data })
+    }
+    catch (err) {
+        console.log(err)
+    }
+    finally {
+        disptach({ type: TOGGLE_VIDEO_FETCHING_STATE })
+    }
 }

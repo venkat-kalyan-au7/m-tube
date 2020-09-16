@@ -1,14 +1,14 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import { fetchHomeVideos } from "../redux/actions/videoActions";
+import { fetchTrendingVideos } from "../redux/actions/videoActions";
 import Videos from "../components/Videos";
-class HomePage extends Component {
+class TrendingPage extends Component {
   componentDidMount() {
-    this.props.fetchHomeVideos();
+    this.props.fetchTrendingVideos();
   }
 
   render() {
-    return (
+    return(
       <div>
         <Videos />
       </div>
@@ -22,4 +22,4 @@ const mapStateToProps = (storeState) => {
   };
 };
 
-export default connect(mapStateToProps, { fetchHomeVideos })(HomePage);
+export default connect(mapStateToProps, { fetchTrendingVideos })(TrendingPage);

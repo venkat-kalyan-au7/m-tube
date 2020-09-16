@@ -1,42 +1,48 @@
 import React from "react";
-import { withRouter } from "react-router-dom";
+import { Card } from "react-bootstrap";
+import { Link } from "react-router-dom";
 
-const VideoListItem = ({ video, history }) => {
-  const handleClick = () => {
-    const videoId = typeof video.id === "string" ? video.id : video.id.videoId;
-    history.push(`/videos/${videoId}`);
-  };
-
+const VideoListItem = ({ video, mode }) => {
   return (
-    <div className="col mb-4">
-      <div
-        onClick={handleClick}
-        className="card h-100"
-        style={{ cursor: "pointer" }}
+    <Card
+      style={{
+        flexBasis: "260px",
+        marginBottom: "10px",
+        marginTop: "40px",
+        marginLeft: "auto",
+      }}
+    >
+      <Link
+        to={
+          mode === "search"
+            ? `/videos/${video.id.videoId}`
+            : `/videos/${video.id}`
+        }
+        style={{ color: "inherit", textDecoration: "none" }}
       >
-        <img
-          loading="lazy"
+        <Card.Img
+          variant="top"
           src={video.snippet.thumbnails.high.url}
-          className="card-img-top"
-          alt="..."
+          width="150px"
+          height="150px"
         />
-        <div className="card-body">
-          <h5 className="card-title">{video.snippet.title}</h5>
-          <p
-            style={{
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-              maxWidth: "100%",
-              overflow: "hidden"
-            }}
-            className="card-text"
-          >
-            {video.snippet.description}
-          </p>
-        </div>
-      </div>
-    </div>
+        <Card.Body>
+          <Card.Title>{video.snippet.title}</Card.Title>
+          <Card.Text>
+            <span style={{ fontWeight: "bold" }}>
+              {" "}
+              <img
+                src={video.snippet.channelId}
+                alt="channelLogo"
+                style={{ width: "50px", height: "50px" }}
+              />{" "}
+            </span>{" "}
+            {video.snippet.channelTitle}
+          </Card.Text>
+        </Card.Body>
+      </Link>
+    </Card>
   );
 };
 
-export default withRouter(VideoListItem);
+export default VideoListItem;
